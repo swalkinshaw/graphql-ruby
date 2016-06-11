@@ -41,5 +41,7 @@ module GraphQL
   end
 end
 
+require "graphql/directive/defer_directive"
 require "graphql/directive/include_directive"
 require "graphql/directive/skip_directive"
+require "graphql/directive/stream_directive"

@@ -4,7 +4,6 @@ module GraphQL
   module InternalRepresentation
     class Node
       def initialize(parent:, ast_node: nil, return_type: nil, name: nil, definition_name: nil, definitions: {}, children: {}, spreads: [], directives: Set.new)
-        # Make sure these are kept in sync with #dup
         @ast_node = ast_node
         @return_type = return_type
         @name = name

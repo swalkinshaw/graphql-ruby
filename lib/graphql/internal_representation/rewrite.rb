@@ -76,7 +76,7 @@ module GraphQL
               ast_node: ast_node,
               definitions: [context.directive_definition],
               # This isn't used, the directive may have many parents in the case of inline fragment
-              parent: nil,
+              parent: @nodes.last,
             )
           end
         }

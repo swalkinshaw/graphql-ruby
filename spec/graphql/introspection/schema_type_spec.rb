@@ -20,6 +20,7 @@ describe GraphQL::Introspection::SchemaType do
           "fields"=>[
             {"name"=>"allDairy"},
             {"name"=>"cheese"},
+            {"name"=>"cheeses"},
             {"name"=>"cow"},
             {"name"=>"dairy"},
             {"name"=>"deepNonNull"},

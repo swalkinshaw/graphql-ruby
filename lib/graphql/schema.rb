@@ -14,7 +14,12 @@ module GraphQL
   class Schema
     extend Forwardable
 
-    DIRECTIVES = [GraphQL::Directive::SkipDirective, GraphQL::Directive::IncludeDirective]
+    DIRECTIVES = [
+      GraphQL::Directive::SkipDirective,
+      GraphQL::Directive::IncludeDirective,
+      GraphQL::Directive::DeferDirective,
+      GraphQL::Directive::StreamDirective,
+    ]
     DYNAMIC_FIELDS = ["__type", "__typename", "__schema"]
 
     attr_reader :query, :mutation, :subscription, :directives, :static_validator, :query_analyzers
@@ -50,7 +55,7 @@ module GraphQL
       @middleware = [@rescue_middleware]
       @query_analyzers = []
       # Default to the built-in execution strategy:
-      self.query_execution_strategy = GraphQL::Query::SerialExecution
+      self.query_execution_strategy = GraphQL::Execution::DeferredExecution
       self.mutation_execution_strategy = GraphQL::Query::SerialExecution
       self.subscription_execution_strategy = GraphQL::Query::SerialExecution
     end
