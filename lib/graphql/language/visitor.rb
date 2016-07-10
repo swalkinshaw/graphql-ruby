@@ -42,8 +42,8 @@ module GraphQL
 
       # Visit `document` and all children, applying hooks as you go
       # @return [void]
-      def visit
-        visit_node(@document, nil)
+      def visit(node = @document)
+        visit_node(node, nil)
       end
 
       private
@@ -51,26 +51,30 @@ module GraphQL
       def visit_node(node, parent)
         begin_hooks_result = begin_visit(node, parent)
         if begin_hooks_result
-          node.children.reduce(true) { |memo, child| memo && visit_node(child, node) }
+          child_result = visit_nodes(node.children, node)
           if @follow_fragments && node.is_a?(GraphQL::Language::Nodes::FragmentSpread)
             frag_defn = fragments[node.name]
-            visit_node(frag_defn, node)
+            if frag_defn
+              child_result = child_result && visit_node(frag_defn, node)
+            end
           end
         end
         end_visit(node, parent)
       end
 
+      def visit_nodes(nodes, parent)
+        nodes.reduce(true) { |memo, child| memo && visit_node(child, parent) }
+      end
+
       def begin_visit(node, parent)
-        self.class.apply_hooks(enter, node, parent)
         node_visitor = self[node.class]
-        self.class.apply_hooks(node_visitor.enter, node, parent)
+        self.class.apply_hooks(enter, node, parent) && self.class.apply_hooks(node_visitor.enter, node, parent)
       end
 
       # Should global `leave` visitors come first or last?
       def end_visit(node, parent)
-        self.class.apply_hooks(leave, node, parent)
         node_visitor = self[node.class]
-        self.class.apply_hooks(node_visitor.leave, node, parent)
+        self.class.apply_hooks(leave, node, parent) && self.class.apply_hooks(node_visitor.leave, node, parent)
       end
 
       # If one of the visitors returns SKIP, stop visiting this node

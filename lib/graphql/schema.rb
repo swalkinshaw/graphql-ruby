@@ -40,6 +40,7 @@ module GraphQL
       @max_depth = max_depth
       @max_complexity = max_complexity
       @orphan_types = types
+      # TODO: is this the wrong place for this?
       @directives = DIRECTIVES.reduce({}) { |m, d| m[d.name] = d; m }
       @static_validator = GraphQL::StaticValidation::Validator.new(schema: self)
       @rescue_middleware = GraphQL::Schema::RescueMiddleware.new

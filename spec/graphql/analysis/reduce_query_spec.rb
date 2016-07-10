@@ -37,11 +37,11 @@ describe GraphQL::Analysis do
     |}
 
     it "calls the defined reducers" do
-      collected_types, node_counts = reduce_result
+      type_errors, collected_types, node_counts = reduce_result
       expected_visited_types = [QueryType, CheeseType, GraphQL::INT_TYPE, GraphQL::STRING_TYPE]
       assert_equal expected_visited_types, collected_types
       expected_node_counts = {
-        GraphQL::Language::Nodes::Document => 1,
+        # GraphQL::Language::Nodes::Document => 1,
         GraphQL::Language::Nodes::OperationDefinition => 1,
         GraphQL::Language::Nodes::Field => 3,
         GraphQL::Language::Nodes::Argument => 1

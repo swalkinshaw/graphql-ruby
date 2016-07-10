@@ -68,4 +68,8 @@ describe GraphQL::Analysis::QueryDepth do
       assert_equal depths, [query, 4]
     end
   end
+
+  describe "on undefined fields" do
+    it "doesn't count them"
+  end
 end
