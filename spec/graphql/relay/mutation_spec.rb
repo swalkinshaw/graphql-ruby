@@ -24,7 +24,7 @@ describe GraphQL::Relay::Mutation do
   end
 
   it "returns the result & clientMutationId" do
-    result = query(query_string, "clientMutationId" => "1234")
+    result = star_wars_query(query_string, "clientMutationId" => "1234")
     expected = {"data" => {
       "introduceShip" => {
         "clientMutationId" => "1234",
@@ -39,7 +39,7 @@ describe GraphQL::Relay::Mutation do
   end
 
   it "doesn't require a clientMutationId to perform mutations" do
-    result = query(query_string)
+    result = star_wars_query(query_string)
     expected = {"data" => {
       "introduceShip" => {
         "clientMutationId" => nil,
