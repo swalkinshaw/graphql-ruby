@@ -17,11 +17,11 @@ module GraphQL
         if potential_type == current_type
           true
         elsif current_type.kind.union?
-          current_type.resolve_type(value, query_ctx) == potential_type
+          current_type.possible_types.include?(potential_type)
         elsif potential_type.kind.union?
           potential_type.include?(current_type)
         elsif current_type.kind.interface?
-          current_type.resolve_type(value, query_ctx) == potential_type
+          potential_type.interfaces.include?(current_type)
         elsif potential_type.kind.interface?
           current_type.interfaces.include?(potential_type)
         else

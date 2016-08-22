@@ -332,4 +332,8 @@ DummySchema = GraphQL::Schema.define do
   orphan_types [HoneyType, BeverageUnion]
 
   rescue_from(NoSuchDairyError) { |err| err.message  }
+
+  resolve_type -> (obj) {
+    DummySchema.types[obj.class.name]
+  }
 end
