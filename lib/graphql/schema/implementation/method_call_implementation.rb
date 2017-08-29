@@ -12,6 +12,14 @@ module GraphQL
         end
 
         def call(proxy, args, ctx)
+          if proxy.class.respond_to?(:decorated_resolvers)
+            if decorators = proxy.class.decorated_resolvers.to_h[@method_name.to_sym]
+              decorators.each do |decorator|
+                decorator.call(proxy.object, proxy.context)
+              end
+            end
+          end
+
           if @no_arguments
             proxy.public_send(@method_name)
           else

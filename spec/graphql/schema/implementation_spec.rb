@@ -7,6 +7,12 @@ describe GraphQL::Schema::Implementation do
   end
 
   module TestImplementation
+    class MyDecorator
+      def call(object, context)
+        puts "object: #{object}"
+      end
+    end
+
     class Query < GraphQL::Object
       def cards
         [
@@ -16,12 +22,14 @@ describe GraphQL::Schema::Implementation do
         ]
       end
 
+      decorate MyDecorator
       def suit(letter:)
         letter
       end
     end
 
     class Card < GraphQL::Object
+      decorate MyDecorator
       def is_facecard
         object.number > 10 || object.number == 1
       end
