@@ -8,8 +8,6 @@ module GraphQL
   # - Share code via composition or inheritance
   # - Access the query context via `context`
   class Object
-    extend ResolveDecorators
-
     # @return [Object] The runtime object that this proxy wraps
     attr_reader :__proxied_object
     alias :object :__proxied_object
