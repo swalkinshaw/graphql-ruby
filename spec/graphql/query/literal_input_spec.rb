@@ -5,6 +5,19 @@ describe GraphQL::Query::LiteralInput do
   describe ".from_arguments" do
     describe "arguments are prepared" do
       let(:schema) {
+        input = GraphQL::InputObjectType.define do
+          name "SomeInput"
+
+          argument :value do
+            type types.Int
+            default_value 3
+            prepare ->(arg, ctx) do
+              return GraphQL::ExecutionError.new("Can't return more than 3 digits") if arg > 998
+              arg + ctx[:val]
+            end
+          end
+        end
+
         type = GraphQL::ObjectType.define do
           name "SomeType"
 
@@ -19,6 +32,18 @@ describe GraphQL::Query::LiteralInput do
               end
             end
             resolve ->(t, a, c) { a[:value] }
+          end
+
+          field :fieldWithInputObjectArgument do
+            type !types.Int
+
+            argument :input do
+              type input
+            end
+            resolve ->(t, a, c) do
+              a[:input][:value]
+              99
+            end
           end
 
           field :fieldWithArgumentThatIsBadByDefault do
@@ -85,6 +110,31 @@ describe GraphQL::Query::LiteralInput do
         assert_equal(result["errors"][0]["locations"][0]["line"], 1)
         assert_equal(result["errors"][0]["locations"][0]["column"], 28)
         assert_equal(result["errors"][0]["path"], ["top", "addToArgumentValue"])
+      end
+
+      it "adds message to errors key if an ExecutionError is returned from the prepare function within an input type" do
+        result = schema.execute("{ top { fieldWithInputObjectArgument(input: { value: 1000 } ) } }")
+
+        assert_equal(result["data"]["top"], nil)
+        assert_equal(result["errors"][0]["message"], "Can't return more than 3 digits")
+        assert_equal(result["errors"][0]["locations"][0]["line"], 1)
+        assert_equal(result["errors"][0]["locations"][0]["column"], 47)
+        assert_equal(result["errors"][0]["path"], ["top", "fieldWithInputObjectArgument"])
+      end
+
+      it "adds message to errors key if an ExecutionError is returned from the prepare function within an input type when variables are used" do
+        variables = { 'input' => { 'value' => 1000 } }
+
+        result = schema.execute(
+          "query Error($input: SomeInput) { top { fieldWithInputObjectArgument(input: $input) } }",
+          variables: variables
+        )
+
+        assert_equal(result["data"]["top"], nil)
+        assert_equal(result["errors"][0]["message"], "Can't return more than 3 digits")
+        assert_equal(result["errors"][0]["locations"][0]["line"], 1)
+        assert_equal(result["errors"][0]["locations"][0]["column"], 40)
+        assert_equal(result["errors"][0]["path"], ["top", "fieldWithInputObjectArgument"])
       end
     end
   end
