@@ -177,6 +177,62 @@ describe GraphQL::Schema::Interface do
       include GraphQL::Schema::Interface
     end
 
+    module DefaultFieldDescription
+      extend ActiveSupport::Concern
+
+      module ClassMethods
+        def field(*args, **kwargs)
+          kwargs[:description] += ' plus DefaultFieldDescription'
+          super
+        end
+      end
+    end
+
+    module DefaultFieldDescription2
+      def field(*args, **kwargs)
+        kwargs[:description] += ' plus DefaultFieldDescription2'
+        super
+      end
+    end
+
+    module BaseInterface
+      include GraphQL::Schema::Interface
+
+      definition_methods do
+        include DefaultFieldDescription
+
+        def field(*args, **kwargs)
+          kwargs[:description] = 'from interface'
+          super
+        end
+      end
+    end
+
+    module BaseInterface2
+      include GraphQL::Schema::Interface
+
+      definition_methods do
+        include DefaultFieldDescription2
+
+        def field(*args, **kwargs)
+          kwargs[:description] = 'from interface'
+          super
+        end
+      end
+    end
+
+    module NodeInterface
+      include BaseInterface
+
+      field :id, ID, null: false
+    end
+
+    module NodeInterface2
+      include BaseInterface2
+
+      field :id, ID, null: false
+    end
+
     class ObjectA < GraphQL::Schema::Object
       implements InterfaceA
     end
@@ -194,6 +250,14 @@ describe GraphQL::Schema::Interface do
 
     it "extends classes with the defined methods" do
       assert_equal(ObjectA.some_method, InterfaceA.some_method)
+    end
+
+    it "allows normal method overriding with concerns" do
+      assert_equal('from interface plus DefaultFieldDescription', NodeInterface.fields['id'].description)
+    end
+
+    it "allows normal method overriding from normal modules" do
+      assert_equal('from interface plus DefaultFieldDescription2', NodeInterface2.fields['id'].description)
     end
   end
 end
