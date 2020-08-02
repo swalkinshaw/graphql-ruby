@@ -17,6 +17,7 @@ module GraphQL
         super
         @visited_fragments = {}
         @compared_fragments = {}
+        @printer = GraphQL::Language::Printer.new
       end
 
       def on_operation_definition(node, _parent)
@@ -332,8 +333,7 @@ module GraphQL
           if n.arguments.any?
             serialized_args = {}
             n.arguments.each do |a|
-              arg_value = a.value
-              serialized_args[a.name] = serialize_arg(arg_value)
+              serialized_args[a.name] = @printer.print(a.value)
             end
             serialized_args
           else
