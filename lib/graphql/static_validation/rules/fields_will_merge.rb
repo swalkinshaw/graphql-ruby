@@ -1,5 +1,3 @@
- # frozen_string_literal: true
-
 # frozen_string_literal: true
 module GraphQL
   module StaticValidation
@@ -173,11 +171,15 @@ module GraphQL
 
       def find_conflicts_within(response_keys)
         response_keys.each do |key, fields|
-          next if fields.size < 2
+          fields_size = fields.size
+
+          next if fields_size < 2
           # find conflicts within nodes
-          for i in 0..fields.size - 1
-            for j in i + 1..fields.size - 1
-              find_conflict(key, fields[i], fields[j])
+          for i in 0..fields_size - 1
+            for j in i + 1..fields_size - 1
+              if fields[i].node != fields[j].node
+                find_conflict(key, fields[i], fields[j])
+              end
             end
           end
         end
@@ -187,8 +189,7 @@ module GraphQL
         node1 = field1.node
         node2 = field2.node
 
-        are_mutually_exclusive = mutually_exclusive ||
-                                 mutually_exclusive?(field1.parents, field2.parents)
+        are_mutually_exclusive = mutually_exclusive || mutually_exclusive?(field1.parents, field2.parents)
 
         if !are_mutually_exclusive
           if node1.name != node2.name
@@ -340,17 +341,6 @@ module GraphQL
             NO_ARGS
           end
         end.uniq
-      end
-
-      def serialize_arg(arg_value)
-        case arg_value
-        when GraphQL::Language::Nodes::AbstractNode
-          arg_value.to_query_string
-        when Array
-          "[#{arg_value.map { |a| serialize_arg(a) }.join(", ")}]"
-        else
-          GraphQL::Language.serialize(arg_value)
-        end
       end
 
       def compared_fragments_key(frag1, frag2, exclusive)
